@@ -1,0 +1,19 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var daymet = ee.ImageCollection("NASA/ORNL/DAYMET_V3"),
+    SD = /* color: #d63000 */ee.Geometry.Point([-116.8341064453125, 33.07773395720984]);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+var winterPrcpt = daymet.select('prcp').filterDate('2013-12-21','2014-03-21');
+
+var totalPrcp2014 = winterPrcpt.sum();
+var uscounties = ee.FeatureCollection('ft:1S4EB6319wWW2sWQDPhDvmSBIVrD3iEmCLYB7nMM');
+Map.addLayer(uscounties)
+var sanDiegoCounty = uscounties.filterBounds(SD);
+Map.addLayer(sanDiegoCounty);
+
+var averagePrcpSD = totalPrcp2014.reduceRegion({
+  'reducer': ee.Reducer.mean(),
+  'geometry': sanDiegoCounty,
+  'scale': 1000
+});
+
+print(averagePrcpSD)

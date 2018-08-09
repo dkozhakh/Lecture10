@@ -1,0 +1,19 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var usaStates = ee.FeatureCollection("users/dkozhakh/Lecture10_KML_USA_States"),
+    geometry = /* color: #d63000 */ee.Geometry.MultiPoint(),
+    ntl = ee.ImageCollection("NOAA/DMSP-OLS/NIGHTTIME_LIGHTS");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+
+print('number of USA states', usaStates.size());
+Map.addLayer(usaStates);
+//Alaska and Hawai are missing
+print(usaStates);
+var California = usaStates.filterMetadata('name', 'equals', 'California');
+Map.addLayer(ee.Image(0).mask(0).paint(California,0,2),{},'California');
+var CaliforniaArea = California.geometry().area();
+print(CaliforniaArea);
+
+var ntl2013 = ee.Image('NOAA/DMSP-OLS/NIGHTTIME_LIGHTS/F182013')
+Map.addLayer(ntl2013, {}, 'ntl2013');
+var ntl_California = ntl2013.clip(California);
+Map.addLayer(ntl_California,{},'Night California');

@@ -1,0 +1,49 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var Ahmedabad = /* color: #d63000 */ee.Geometry.Polygon(
+        [[[72.47955322265625, 23.09552299884866],
+          [72.48092651367188, 22.9640834950329],
+          [72.6800537109375, 22.961554557059433],
+          [72.67593383789062, 23.091733271320724]]]),
+    l7 = ee.ImageCollection("LANDSAT/LE07/C01/T1");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+//2016 year//
+
+var l8 = ee.ImageCollection("LANDSAT/LC8_L1T");
+var image = ee.Algorithms.Landsat.simpleComposite({
+  collection: l8.filterDate('2016-01-01', '2016-12-31'),
+  asFloat: true
+});
+var ndvi = image.normalizedDifference(['B5', 'B4']).rename('NDVI'); 
+var ndbi = image.normalizedDifference(['B6', 'B5']).rename('NDBI');
+
+var predictors = image.addBands(ndvi).addBands(ndbi);
+var bands = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B10', 'B11', 'NDVI', 'NDBI'];
+var groundTruthFullData = ee.FeatureCollection('ft:1fWY4IyYiV-BA5HsAKi2V9LdoQgsbFtKK2BoQiHb0').remap([1, 2], [1, 0],'class');
+var AhmedabadExamples = groundTruthFullData.filterBounds(Ahmedabad);
+var training = predictors.sampleRegions(AhmedabadExamples, ['class'], 30);
+var randomForest = ee.Classifier.randomForest({'numberOfTrees': 20});
+var trained = randomForest.train(training, 'class', bands);
+var classified = predictors.select(bands).classify(trained);
+Map.addLayer(classified.mask(classified), 
+{palette: ['ff0000']}, 
+'only BU');
+//2000//
+
+var image_00 = ee.Algorithms.Landsat.simpleComposite({
+  collection: l7.filterDate('2000-01-01', '2000-12-31'),
+  asFloat: true
+});
+var ndvi_00 = image.normalizedDifference(['B4', 'B3']).rename('NDVI'); 
+var ndbi_00 = image.normalizedDifference(['B5', 'B4']).rename('NDBI');
+
+var predictors_00 = image_00.addBands(ndvi).addBands(ndbi);
+var bands_00 = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B10', 'B11', 'NDVI', 'NDBI'];
+var groundTruthFullData_00 = ee.FeatureCollection('ft:1fWY4IyYiV-BA5HsAKi2V9LdoQgsbFtKK2BoQiHb0').remap([1, 2], [1, 0],'class');
+var AhmedabadExamples_00 = groundTruthFullData_00.filterBounds(Ahmedabad);
+var training_00 = predictors_00.sampleRegions(AhmedabadExamples, ['class'], 30);
+var randomForest_00 = ee.Classifier.randomForest({'numberOfTrees': 20});
+var trained_00 = randomForest_00.train(training, 'class', bands);
+var classified_00 = predictors_00.select(bands).classify(trained);
+Map.addLayer(classified.mask(classified), 
+{palette: ['ff0000']}, 
+'only BU');
